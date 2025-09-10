@@ -21,7 +21,10 @@
     .btn{background:var(--accent);color:#fff;padding:10px 16px;border:none;border-radius:var(--radius);cursor:pointer;font-weight:600;font-size:.95rem;}
     .btn:hover{background:#2980b9;}
     .btn-small{font-size:.8rem;padding:6px 10px;}
-    .top-actions{text-align:center;margin:1.5rem 0;}
+    .top-actions{text-align:center;margin:1.5rem 0;display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;}
+
+    /* Búsqueda */
+    #searchInput{padding:.6rem 1rem;width:300px;max-width:90%;border:1px solid #ccc;border-radius:8px;font-size:1rem;}
 
     /* Grid de módulos */
     .layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;}
@@ -38,7 +41,13 @@
     .empty{color:#777;text-align:center;padding:1rem;font-style:italic;}
     .card-footer{margin-top:1rem;text-align:center;}
 
-    /* Modal */
+    /* Ayuda */
+    .help-box{background:#fff;border-left:6px solid var(--accent);padding:1rem 1.5rem;margin:1.5rem auto;border-radius:8px;max-width:800px;box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+    .help-box h2{margin-top:0;color:var(--accent);font-size:1.3rem;}
+    .help-box ul{margin:0;padding-left:1.2rem;}
+    .help-box li{margin:.4rem 0;}
+
+    /* Modal y progreso (ya estaban) */
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:16px;z-index:2000;}
     .modal-content{background:#fff;border-radius:var(--radius);padding:20px;max-width:520px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,0.25);}
     .modal-content h2{margin-top:0;margin-bottom:1rem;color:var(--primary);}
@@ -49,7 +58,6 @@
     .modal-actions{display:flex;justify-content:flex-end;gap:.8rem;margin-top:1rem;}
     .btn-secondary{background:#888;color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;}
     .preview-img{max-width:100%;border-radius:8px;margin-top:10px;border:1px solid #eee;}
-    /* Progreso */
     #progressWrap{display:none;margin:1rem 0;text-align:center;}
     .progressBar{height:12px;background:#eee;border-radius:8px;overflow:hidden;}
     .progressFill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#2a7bd4);}
@@ -64,6 +72,7 @@
     </header>
 
     <div class="top-actions">
+      <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre, tema, detalle, dictamen o categoría" />
       <button class="btn" id="openFileBtn">📤 Importar dictamen</button>
       <input type="file" id="fileInput" style="display:none" accept=".pdf,application/pdf,image/*,.doc,.docx,.odt,.txt,.rtf" />
     </div>
@@ -72,6 +81,18 @@
     <div id="progressWrap">
       <div class="small-note">Subida en progreso: <span id="progressPercent">0%</span></div>
       <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
+    </div>
+
+    <!-- Ayuda -->
+    <div class="help-box">
+      <h2>ℹ️ ¿Cómo importar un dictamen?</h2>
+      <ul>
+        <li>Haz clic en el botón <strong>📤 Importar dictamen</strong> o en <strong>+ Agregar</strong> dentro de una categoría.</li>
+        <li>Selecciona un Dictamen Firmado desde tu computadora (PDF).</li>
+        <li>Completa el <strong>formulario</strong> con nombre, categoría, temática y detalle.</li>
+        <li>Guarda el documento. ✔️ Automáticamente quedará almacenado en tu navegador.</li>
+        <li>Puedes buscar documentos usando el cuadro de búsqueda superior.</li>
+      </ul>
     </div>
 
     <!-- Módulos -->
@@ -99,7 +120,7 @@
     </section>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal (sin cambios salvo lo previo) -->
   <div class="modal" id="modal">
     <div class="modal-content">
       <h2 id="modalTitle">Documento</h2>
@@ -142,8 +163,8 @@
 
   <script>
     /******** CONFIG ********/
-    const CLOUD_NAME = "TU_CLOUD_NAME";       // ⚠️ tu cloud name
-    const UPLOAD_PRESET = "TU_UPLOAD_PRESET"; // ⚠️ unsigned preset
+    const CLOUD_NAME = "TU_CLOUD_NAME";
+    const UPLOAD_PRESET = "TU_UPLOAD_PRESET";
     /************************/
     let documents = JSON.parse(localStorage.getItem("documents") || "[]");
     const currentUser = "Usuario Actual";
@@ -166,6 +187,7 @@
     const progressWrap = document.getElementById("progressWrap");
     const progressFill = document.getElementById("progressFill");
     const progressPercent = document.getElementById("progressPercent");
+    const searchInput = document.getElementById("searchInput");
 
     renderDocuments();
 
@@ -253,17 +275,35 @@
       renderDocuments();
     });
 
-    function renderDocuments(){
+    // 🔍 Filtro de búsqueda
+    searchInput.addEventListener("input", ()=>{
+      renderDocuments(searchInput.value.toLowerCase());
+    });
+
+    function renderDocuments(filter=""){
       Object.keys(categoryMap).forEach(cat=>{
         const {container,count}=categoryMap[cat];
         const el=document.getElementById(container);
         const c=document.getElementById(count);
-        const docs=documents.filter(d=>d.category===cat);
+        let docs=documents.filter(d=>d.category===cat);
+
+        // Aplicar filtro
+        if(filter){
+          docs = docs.filter(d=>
+            d.name.toLowerCase().includes(filter) ||
+            (d.theme||"").toLowerCase().includes(filter) ||
+            (d.detail||"").toLowerCase().includes(filter) ||
+            d.category.toLowerCase().includes(filter)
+          );
+        }
+
         c.textContent=docs.length;
         el.innerHTML= docs.length? docs.map(d=>`
           <div class="doc">
             <strong>${d.name}</strong>
             <small>${d.date} · ${d.user}</small>
+            <em>${d.theme||""}</em><br>
+            <small>${d.detail||""}</small><br>
             <a href="${d.url}" target="_blank">Ver documento</a>
             <button class="edit-btn" onclick="editDoc('${d.id}')">✏️ Editar</button>
           </div>`).join("") : `<div class="empty">📁 Sin documentos</div>`;
