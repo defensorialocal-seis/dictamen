@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dictámenes de la Defensoría Civil y Comercial 6</title>
+  <style>
+    :root {
+      --primary:#2c3e50;
+      --accent:#3498db;
+      --success:#27ae60;
+      --danger:#e74c3c;
+      --light:#f8f9fa;
+      --radius:12px;
+    }
+    body{font-family:'Segoe UI',Roboto,Arial,sans-serif;margin:0;background:var(--light);color:var(--primary);}
+    .container{max-width:1300px;margin:auto;padding:1.5rem;}
+    header{text-align:center;margin-bottom:2rem;}
+    header h1{font-size:2rem;margin-bottom:.3rem;color:var(--primary);}
+    header p{font-size:1rem;color:#555;max-width:700px;margin:auto;}
+    .btn{background:var(--accent);color:#fff;padding:10px 16px;border:none;border-radius:var(--radius);cursor:pointer;font-weight:600;font-size:.95rem;}
+    .btn:hover{background:#2980b9;}
+    .btn-small{font-size:.8rem;padding:6px 10px;}
+    .top-actions{text-align:center;margin:1.5rem 0;}
+
+    /* Grid de módulos */
+    .layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;}
+    .card{background:#fff;padding:1.5rem;border-radius:var(--radius);box-shadow:0 6px 18px rgba(0,0,0,0.08);transition:transform .2s;display:flex;flex-direction:column;}
+    .card:hover{transform:translateY(-4px);}
+    .card h3{margin:0 0 1rem 0;font-size:1.2rem;color:var(--accent);display:flex;justify-content:space-between;align-items:center;}
+    .card .body{flex:1;overflow:auto;max-height:350px;}
+    .doc{padding:.8rem;border-bottom:1px solid #eee;}
+    .doc:last-child{border-bottom:none;}
+    .doc strong{display:block;font-size:1rem;}
+    .doc small{color:#777;font-size:.85rem;}
+    .doc a{display:inline-block;margin-top:.3rem;color:var(--accent);text-decoration:none;font-weight:600;font-size:.9rem;}
+    .doc .edit-btn{margin-top:.4rem;background:var(--success);color:white;padding:6px 10px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;}
+    .empty{color:#777;text-align:center;padding:1rem;font-style:italic;}
+    .card-footer{margin-top:1rem;text-align:center;}
+
+    /* Modal */
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:16px;z-index:2000;}
+    .modal-content{background:#fff;border-radius:var(--radius);padding:20px;max-width:520px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,0.25);}
+    .modal-content h2{margin-top:0;margin-bottom:1rem;color:var(--primary);}
+    .form-row{margin-bottom:1rem;}
+    label{display:block;font-weight:600;margin-bottom:.4rem;font-size:.9rem;}
+    input[type="text"],select,textarea{width:100%;padding:.6rem;border-radius:8px;border:1px solid #ccc;font-size:1rem;}
+    textarea{min-height:100px;resize:vertical;}
+    .modal-actions{display:flex;justify-content:flex-end;gap:.8rem;margin-top:1rem;}
+    .btn-secondary{background:#888;color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;}
+    .preview-img{max-width:100%;border-radius:8px;margin-top:10px;border:1px solid #eee;}
+    /* Progreso */
+    #progressWrap{display:none;margin:1rem 0;text-align:center;}
+    .progressBar{height:12px;background:#eee;border-radius:8px;overflow:hidden;}
+    .progressFill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#2a7bd4);}
+    .small-note{font-size:.9rem;color:#555;margin-top:.5rem;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Dictámenes de la Defensoría Civil y Comercial 6</h1>
+      <p>Los dictámenes firmados por el Defensor Oficial para uso como antecedentes o para nuevo dictamen.</p>
+    </header>
+
+    <div class="top-actions">
+      <button class="btn" id="openFileBtn">📤 Importar dictamen</button>
+      <input type="file" id="fileInput" style="display:none" accept=".pdf,application/pdf,image/*,.doc,.docx,.odt,.txt,.rtf" />
+    </div>
+
+    <!-- Progreso -->
+    <div id="progressWrap">
+      <div class="small-note">Subida en progreso: <span id="progressPercent">0%</span></div>
+      <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
+    </div>
+
+    <!-- Módulos -->
+    <section class="layout">
+      <div class="card">
+        <h3>Civil <span id="civilCount">0</span></h3>
+        <div class="body" id="civilDocuments"></div>
+        <div class="card-footer"><button class="btn btn-small add-btn" data-cat="Civil">+ Agregar</button></div>
+      </div>
+      <div class="card">
+        <h3>Familia <span id="familiaCount">0</span></h3>
+        <div class="body" id="familiaDocuments"></div>
+        <div class="card-footer"><button class="btn btn-small add-btn" data-cat="Familia">+ Agregar</button></div>
+      </div>
+      <div class="card">
+        <h3>Violencia Familiar <span id="violenciaCount">0</span></h3>
+        <div class="body" id="violenciaDocuments"></div>
+        <div class="card-footer"><button class="btn btn-small add-btn" data-cat="Violencia Familiar">+ Agregar</button></div>
+      </div>
+      <div class="card">
+        <h3>Otros <span id="otrosCount">0</span></h3>
+        <div class="body" id="otrosDocuments"></div>
+        <div class="card-footer"><button class="btn btn-small add-btn" data-cat="Otros">+ Agregar</button></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Documento</h2>
+      <form id="docForm">
+        <input type="hidden" id="docId" />
+        <input type="hidden" id="docUrlHidden" />
+        <div class="form-row">
+          <label for="docName">Nombre</label>
+          <input id="docName" type="text" required />
+        </div>
+        <div class="form-row">
+          <label for="docCategory">Categoría</label>
+          <select id="docCategory" required>
+            <option value="Civil">Civil</option>
+            <option value="Familia">Familia</option>
+            <option value="Violencia Familiar">Violencia Familiar</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="docTheme">Temática (opcional)</label>
+          <input id="docTheme" type="text" />
+        </div>
+        <div class="form-row">
+          <label for="docDetail">Detalle</label>
+          <textarea id="docDetail"></textarea>
+        </div>
+        <div class="form-row">
+          <label>URL del archivo</label>
+          <div id="fileUrlWrap"></div>
+        </div>
+        <div id="filePreviewWrap"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="cancelModal">Cancelar</button>
+          <button type="submit" class="btn">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /******** CONFIG ********/
+    const CLOUD_NAME = "TU_CLOUD_NAME";       // ⚠️ tu cloud name
+    const UPLOAD_PRESET = "TU_UPLOAD_PRESET"; // ⚠️ unsigned preset
+    /************************/
+    let documents = JSON.parse(localStorage.getItem("documents") || "[]");
+    const currentUser = "Usuario Actual";
+    let targetCategory = null;
+
+    const categoryMap = {
+      "Civil": { container: "civilDocuments", count: "civilCount" },
+      "Familia": { container: "familiaDocuments", count: "familiaCount" },
+      "Violencia Familiar": { container: "violenciaDocuments", count: "violenciaCount" },
+      "Otros": { container: "otrosDocuments", count: "otrosCount" }
+    };
+
+    const openFileBtn = document.getElementById("openFileBtn");
+    const fileInput = document.getElementById("fileInput");
+    const modal = document.getElementById("modal");
+    const docForm = document.getElementById("docForm");
+    const cancelModal = document.getElementById("cancelModal");
+    const fileUrlWrap = document.getElementById("fileUrlWrap");
+    const filePreviewWrap = document.getElementById("filePreviewWrap");
+    const progressWrap = document.getElementById("progressWrap");
+    const progressFill = document.getElementById("progressFill");
+    const progressPercent = document.getElementById("progressPercent");
+
+    renderDocuments();
+
+    // Botón general
+    openFileBtn.addEventListener("click", ()=>{ targetCategory=null; fileInput.click(); });
+
+    // Botones + Agregar por categoría
+    document.querySelectorAll(".add-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        targetCategory = btn.dataset.cat;
+        fileInput.click();
+      });
+    });
+
+    fileInput.addEventListener("change", e=>{
+      const file = e.target.files[0];
+      if(file) uploadFile(file);
+    });
+
+    function uploadFile(file){
+      const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`;
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("upload_preset", UPLOAD_PRESET);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+
+      xhr.upload.onprogress = e=>{
+        if(e.lengthComputable){
+          const pct = Math.round((e.loaded/e.total)*100);
+          progressWrap.style.display="block";
+          progressFill.style.width=pct+"%";
+          progressPercent.textContent=pct+"%";
+        }
+      };
+      xhr.onload = ()=>{
+        progressWrap.style.display="none";
+        if(xhr.status>=200 && xhr.status<300){
+          const res = JSON.parse(xhr.responseText);
+          openModal(res.secure_url,res.original_filename+"."+res.format,file.type);
+        } else {
+          alert("Error al subir archivo");
+        }
+      };
+      xhr.send(fd);
+    }
+
+    function openModal(url,name,type){
+      document.getElementById("docId").value="";
+      document.getElementById("docName").value=name;
+      document.getElementById("docCategory").value= targetCategory || "Civil";
+      document.getElementById("docTheme").value="";
+      document.getElementById("docDetail").value="";
+      document.getElementById("docUrlHidden").value=url;
+      fileUrlWrap.innerHTML=`<a href="${url}" target="_blank">${url}</a>`;
+      filePreviewWrap.innerHTML= type.startsWith("image/") ? `<img src="${url}" class="preview-img"/>` : "";
+      modal.style.display="flex";
+    }
+
+    cancelModal.addEventListener("click",()=> modal.style.display="none");
+    window.addEventListener("click",e=>{ if(e.target===modal) modal.style.display="none"; });
+
+    docForm.addEventListener("submit",e=>{
+      e.preventDefault();
+      const id=document.getElementById("docId").value;
+      const doc={
+        id: id||Date.now().toString(),
+        name: document.getElementById("docName").value,
+        category: document.getElementById("docCategory").value,
+        theme: document.getElementById("docTheme").value,
+        detail: document.getElementById("docDetail").value,
+        url: document.getElementById("docUrlHidden").value,
+        date: new Date().toLocaleDateString(),
+        user: currentUser
+      };
+      if(id){
+        const i=documents.findIndex(d=>d.id===id);
+        if(i!==-1) documents[i]=doc;
+      } else {
+        documents.push(doc);
+      }
+      localStorage.setItem("documents",JSON.stringify(documents));
+      modal.style.display="none";
+      renderDocuments();
+    });
+
+    function renderDocuments(){
+      Object.keys(categoryMap).forEach(cat=>{
+        const {container,count}=categoryMap[cat];
+        const el=document.getElementById(container);
+        const c=document.getElementById(count);
+        const docs=documents.filter(d=>d.category===cat);
+        c.textContent=docs.length;
+        el.innerHTML= docs.length? docs.map(d=>`
+          <div class="doc">
+            <strong>${d.name}</strong>
+            <small>${d.date} · ${d.user}</small>
+            <a href="${d.url}" target="_blank">Ver documento</a>
+            <button class="edit-btn" onclick="editDoc('${d.id}')">✏️ Editar</button>
+          </div>`).join("") : `<div class="empty">📁 Sin documentos</div>`;
+      });
+    }
+
+    window.editDoc=function(id){
+      const d=documents.find(x=>x.id===id);
+      if(!d) return;
+      document.getElementById("docId").value=d.id;
+      document.getElementById("docName").value=d.name;
+      document.getElementById("docCategory").value=d.category;
+      document.getElementById("docTheme").value=d.theme||"";
+      document.getElementById("docDetail").value=d.detail||"";
+      document.getElementById("docUrlHidden").value=d.url;
+      fileUrlWrap.innerHTML=`<a href="${d.url}" target="_blank">${d.url}</a>`;
+      filePreviewWrap.innerHTML= d.url.match(/\.(jpg|jpeg|png|gif)$/i)?`<img src="${d.url}" class="preview-img"/>`:"";
+      modal.style.display="flex";
+    }
+  </script>
+</body>
+</html>
