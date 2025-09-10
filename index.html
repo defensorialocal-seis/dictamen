@@ -13,11 +13,11 @@
       --light:#f8f9fa;
       --radius:12px;
     }
-    body{font-family:'Segoe UI',Roboto,Arial,sans-serif;margin:0;background:var(--light);color:var(--primary);}
+    body{font-family:'Segoe UI',Roboto,Arial,sans-serif;margin:0;background-color: #a3c8ff;color: #334155;}
     .container{max-width:1300px;margin:auto;padding:1.5rem;}
     header{text-align:center;margin-bottom:2rem;}
-    header h1{font-size:2rem;margin-bottom:.3rem;color:var(--primary);}
-    header p{font-size:1rem;color:#555;max-width:700px;margin:auto;}
+    header h1{font-size:2rem;margin-bottom:.3rem;color:#334155;} /* Cambiado a azul */
+    header p{font-size:1rem;color:#334155;max-width:700px;margin:auto;} /* Cambiado a color más oscuro */
     .btn{background:var(--accent);color:#fff;padding:10px 16px;border:none;border-radius:var(--radius);cursor:pointer;font-weight:600;font-size:.95rem;}
     .btn:hover{background:#2980b9;}
     .btn-small{font-size:.8rem;padding:6px 10px;}
@@ -266,7 +266,7 @@
       };
       if(id){
         const i=documents.findIndex(d=>d.id===id);
-        if(i!==-1) documents[i]=doc;
+        if(i!=-1) documents[i]=doc;
       } else {
         documents.push(doc);
       }
