@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta ="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dictámenes de la Defensoría Civil y Comercial 6</title>
   <style>
     :root {
@@ -16,8 +16,8 @@
     body{font-family:'Segoe UI',Roboto,Arial,sans-serif;margin:0;background-color: #a3c8ff;color: #334155;}
     .container{max-width:1300px;margin:auto;padding:1.5rem;}
     header{text-align:center;margin-bottom:2rem;}
-    header h1{font-size:2rem;margin-bottom:.3rem;color:#334155;} /* Cambiado a azul */
-    header p{font-size:1rem;color:#334155;max-width:700px;margin:auto;} /* Cambiado a color más oscuro */
+    header h1{font-size:2rem;margin-bottom:.3rem;color:#334155;}
+    header p{font-size:1rem;color:#334155;max-width:700px;margin:auto;}
     .btn{background:var(--accent);color:#fff;padding:10px 16px;border:none;border-radius:var(--radius);cursor:pointer;font-weight:600;font-size:.95rem;}
     .btn:hover{background:#2980b9;}
     .btn-small{font-size:.8rem;padding:6px 10px;}
@@ -77,13 +77,11 @@
       <input type="file" id="fileInput" style="display:none" accept=".pdf,application/pdf,image/*,.doc,.docx,.odt,.txt,.rtf" />
     </div>
 
-    <!-- Progreso -->
     <div id="progressWrap">
       <div class="small-note">Subida en progreso: <span id="progressPercent">0%</span></div>
       <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
     </div>
 
-    <!-- Ayuda -->
     <div class="help-box">
       <h2>ℹ️ ¿Cómo importar un dictamen?</h2>
       <ul>
@@ -95,7 +93,6 @@
       </ul>
     </div>
 
-    <!-- Módulos -->
     <section class="layout">
       <div class="card">
         <h3>Civil <span id="civilCount">0</span></h3>
@@ -120,7 +117,6 @@
     </section>
   </div>
 
-  <!-- Modal (sin cambios salvo lo previo) -->
   <div class="modal" id="modal">
     <div class="modal-content">
       <h2 id="modalTitle">Documento</h2>
@@ -161,12 +157,31 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
   <script>
-    /******** CONFIG ********/
+    /******** CONFIG CLOUDINARY ********/
     const CLOUD_NAME = "dttsqsrmk";
     const UPLOAD_PRESET = "DICTAMEN";
-    /************************/
-    let documents = JSON.parse(localStorage.getItem("documents") || "[]");
+    /***********************************/
+
+    /******** CONFIG FIREBASE ********/
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuOFYjLBR-2azWbR6q-R5vd6HFhGyyQ-w",
+      authDomain: "dictamenes6.firebaseapp.com",
+      databaseURL: "https://dictamenes6-default-rtdb.firebaseio.com",
+      projectId: "dictamenes6",
+      storageBucket: "dictamenes6.firebasestorage.app",
+      messagingSenderId: "497353513668",
+      appId: "1:497353513668:web:83ae1af8fd794bb66ec791"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const documentsRef = database.ref('documents');
+    /***********************************/
+
+    let documents = [];
     const currentUser = "Usuario Actual";
     let targetCategory = null;
 
@@ -189,8 +204,13 @@
     const progressPercent = document.getElementById("progressPercent");
     const searchInput = document.getElementById("searchInput");
 
-    renderDocuments();
-
+    // Escuchar cambios en la base de datos y renderizar
+    documentsRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      documents = data ? Object.values(data) : [];
+      renderDocuments(searchInput.value.toLowerCase());
+    });
+    
     // Botón general
     openFileBtn.addEventListener("click", ()=>{ targetCategory=null; fileInput.click(); });
 
@@ -211,7 +231,7 @@
       const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`;
       const fd = new FormData();
       fd.append("file", file);
-      fd.append("upload_preset", UPLOAD_PRESET);
+      fd.append("upload_preset", UPLOAD_PRESET); // <<-- Corrección aquí
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", url, true);
@@ -228,7 +248,7 @@
         progressWrap.style.display="none";
         if(xhr.status>=200 && xhr.status<300){
           const res = JSON.parse(xhr.responseText);
-          openModal(res.secure_url,res.original_filename+"."+res.format,file.type);
+          openModal(res.secure_url,res.original_filename,file.type);
         } else {
           alert("Error al subir archivo");
         }
@@ -255,7 +275,6 @@
       e.preventDefault();
       const id=document.getElementById("docId").value;
       const doc={
-        id: id||Date.now().toString(),
         name: document.getElementById("docName").value,
         category: document.getElementById("docCategory").value,
         theme: document.getElementById("docTheme").value,
@@ -264,15 +283,17 @@
         date: new Date().toLocaleDateString(),
         user: currentUser
       };
+
       if(id){
-        const i=documents.findIndex(d=>d.id===id);
-        if(i!=-1) documents[i]=doc;
+        documentsRef.child(id).update(doc)
+          .then(()=> console.log("Documento actualizado"))
+          .catch(error=> console.error("Error al actualizar:", error));
       } else {
-        documents.push(doc);
+        documentsRef.push(doc)
+          .then(()=> console.log("Documento agregado"))
+          .catch(error=> console.error("Error al agregar:", error));
       }
-      localStorage.setItem("documents",JSON.stringify(documents));
       modal.style.display="none";
-      renderDocuments();
     });
 
     // 🔍 Filtro de búsqueda
@@ -285,7 +306,7 @@
         const {container,count}=categoryMap[cat];
         const el=document.getElementById(container);
         const c=document.getElementById(count);
-        let docs=documents.filter(d=>d.category===cat);
+        let docs = Object.values(documents).filter(d=>d.category===cat);
 
         // Aplicar filtro
         if(filter){
