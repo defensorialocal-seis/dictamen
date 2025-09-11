@@ -162,7 +162,7 @@
   <script>
     /******** CONFIG CLOUDINARY ********/
     const CLOUD_NAME = "dttsqsrmk";
-    const UPLOAD_PRESET = "DICTAMEN";
+    const UPLOAD_PRESET = "DICTAMEN"; // <<-- Aquí está la corrección
     /***********************************/
 
     /******** CONFIG FIREBASE ********/
@@ -207,7 +207,16 @@
     // Escuchar cambios en la base de datos y renderizar
     documentsRef.on('value', (snapshot) => {
       const data = snapshot.val();
-      documents = data ? Object.values(data) : [];
+      documents = [];
+      if (data) {
+        // Convertir el objeto de Firebase a un array y agregar el ID de la clave
+        Object.keys(data).forEach(key => {
+          documents.push({
+            id: key,
+            ...data[key]
+          });
+        });
+      }
       renderDocuments(searchInput.value.toLowerCase());
     });
     
@@ -231,7 +240,7 @@
       const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`;
       const fd = new FormData();
       fd.append("file", file);
-      fd.append("upload_preset", UPLOAD_PRESET); // <<-- Corrección aquí
+      fd.append("upload_preset", UPLOAD_PRESET);
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", url, true);
@@ -306,7 +315,7 @@
         const {container,count}=categoryMap[cat];
         const el=document.getElementById(container);
         const c=document.getElementById(count);
-        let docs = Object.values(documents).filter(d=>d.category===cat);
+        let docs = documents.filter(d=>d.category===cat);
 
         // Aplicar filtro
         if(filter){
