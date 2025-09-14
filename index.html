@@ -75,6 +75,7 @@
       <button class="btn" id="openFileBtn">Importar dictamen/escrito</button>
       <a href="https://defensorialocal-seis.github.io/modelosvarios/" class="btn">Modelos Varios</a>
       <a href="https://defensorialocal-seis.github.io/ayuda-plazos" class="btn">Plazos procesales</a>
+      <a href="https://defensorialocal-seis.github.io/ayuda-info/" class="btn">Informacion Adicional</a>
       <input type="file" id="fileInput" style="display:none" accept=".pdf,application/pdf,image/*,.doc,.docx,.odt,.txt,.rtf" />
     </div>
 
@@ -324,7 +325,7 @@
             <em>${d.theme||""}</em><br>
             <small>${d.detail||""}</small><br>
             <a href="${d.url}" target="_blank">Ver documento</a>
-            <button class="edit-btn" onclick="editDoc('${d.id}')">✏️ Editar</button>
+            <button class="edit-btn" onclick="editDoc('${d.id}')"✏️ Editar</button>
           </div>`).join("") : `<div class="empty">📁 Sin documentos</div>`;
       });
     }
