@@ -152,7 +152,7 @@
   <script>
     /******** CONFIG CLOUDINARY ********/
     const CLOUD_NAME = "dttsqsrmk";
-    const UPLOAD_PRESET = "DICTAMEN"; // <<-- Aquí está la corrección
+    const UPLOAD_PRESET = "DICTAMEN"; // <<-- Corrección aquí: el valor debe ser consistente
     /***********************************/
 
     /******** CONFIG FIREBASE ********/
@@ -179,9 +179,9 @@
       "Civil": { container: "civilDocuments", count: "civilCount" },
       "Familia": { container: "familiaDocuments", count: "familiaCount" },
       "Violencia Familiar": { container: "violenciaDocuments", count: "violenciaCount" },
-      "Otros": { container: "otrosDocuments", count: "otrosCount" }
+      "Escritos": { container: "escritosDocuments", count: "escritosCount" }
     };
-
+    
     const openFileBtn = document.getElementById("openFileBtn");
     const fileInput = document.getElementById("fileInput");
     const modal = document.getElementById("modal");
@@ -263,7 +263,7 @@
       document.getElementById("docDetail").value="";
       document.getElementById("docUrlHidden").value=url;
       fileUrlWrap.innerHTML=`<a href="${url}" target="_blank">${url}</a>`;
-      filePreviewWrap.innerHTML= type.startsWith("image/") ? `<img src="${url}" class="preview-img"/>` : "";
+      filePreviewWrap.innerHTML = type.startsWith("image/") ? `<img src="${url}" class="preview-img"/>` : "";
       modal.style.display="flex";
     }
 
@@ -316,16 +316,16 @@
             d.category.toLowerCase().includes(filter)
           );
         }
-
-        c.textContent=docs.length;
-        el.innerHTML= docs.length? docs.map(d=>`
+        
+        c.textContent = docs.length;
+        el.innerHTML = docs.length ? docs.map(d => `
           <div class="doc">
             <strong>${d.name}</strong>
             <small>${d.date} · ${d.user}</small>
-            <em>${d.theme||""}</em><br>
-            <small>${d.detail||""}</small><br>
+            <em>${d.theme || ""}</em><br>
+            <small>${d.detail || ""}</small><br>
             <a href="${d.url}" target="_blank">Ver documento</a>
-            <button class="edit-btn" onclick="editDoc('${d.id}')"✏️ Editar</button>
+            <button class="edit-btn" onclick="editDoc('${d.id}')">✏️ Editar</button>
           </div>`).join("") : `<div class="empty">📁 Sin documentos</div>`;
       });
     }
@@ -340,7 +340,7 @@
       document.getElementById("docDetail").value=d.detail||"";
       document.getElementById("docUrlHidden").value=d.url;
       fileUrlWrap.innerHTML=`<a href="${d.url}" target="_blank">${d.url}</a>`;
-      filePreviewWrap.innerHTML= d.url.match(/\.(jpg|jpeg|png|gif)$/i)?`<img src="${d.url}" class="preview-img"/>`:"";
+      filePreviewWrap.innerHTML = d.url.match(/\.(jpg|jpeg|png|gif)$/i) ? `<img src="${d.url}" class="preview-img"/>` : "";
       modal.style.display="flex";
     }
   </script>
