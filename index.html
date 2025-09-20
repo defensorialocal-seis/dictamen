@@ -62,12 +62,58 @@
     .progressBar{height:12px;background:#eee;border-radius:8px;overflow:hidden;}
     .progressFill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#2a7bd4);}
     .small-note{font-size:.9rem;color:#555;margin-top:.5rem;}
+
+    /* Custom Buttons for Header */
+    .header-buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .header-btn {
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      white-space: nowrap; /* Evita que el texto del botón se rompa */
+    }
+    .header-btn:hover {
+      background-color: #1f2e3d;
+    }
+    .header-title-btn {
+      font-size: 1.2rem;
+      padding: 10px 20px;
+    }
+
+    @media (max-width: 768px) {
+      .header-title-btn {
+        font-size: 1rem;
+        padding: 8px 16px;
+      }
+      .header-btn {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+      }
+      .header-buttons {
+        gap: .3rem;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h2>Dictámenes y Escritos Firmados - Modelos Varios</h2>
+      <div class="header-buttons">
+        <a href="https://admindefensoria6.github.io/registro-dictamen/" class="header-btn">Libro de Dictamen</a>
+        <a href="#" class="header-btn header-title-btn">Dictámenes y Escritos Firmados - Modelos Varios</a>
+        <a href="https://admindefensoria6.github.io/registro-oficios/" class="header-btn">Libro Oficios</a>
+      </div>
     </header>
 
     <div class="top-actions">
